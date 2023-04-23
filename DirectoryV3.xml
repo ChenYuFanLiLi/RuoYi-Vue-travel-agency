@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+ <trees>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/CustomerController.java" title="顾客"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/CustomerRoomController.java" title="顾客-房间"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/CustomerVehicleController.java" title="顾客-车辆"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/GroupInfoController.java" title="组团信息"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/OperationPlanController.java" title="操作计划"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/ReceivingCustomersController.java" title="收客表"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/RoomController.java" title="房间"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/RouteInfoController.java" title="线路信息"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/SubjectController.java" title="项目"/>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/VehicleController.java" title="车辆信息"/>
+ </trees>
