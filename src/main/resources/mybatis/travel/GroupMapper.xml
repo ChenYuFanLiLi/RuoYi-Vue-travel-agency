@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.GroupMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.Group" id="GroupResult">
+        <result property="id"    column="id"    />
+        <result property="groupName"    column="group_name"    />
+        <result property="groupLeaderName"    column="group_leader_name"    />
+        <result property="groupLeaderPhone"    column="group_leader_phone"    />
+        <result property="groupCompanyName"    column="group_company_name"    />
+        <result property="groupFax"    column="group_fax"    />
+        <result property="groupPhone"    column="group_phone"    />
+        <result property="groupMobile"    column="group_mobile"    />
+        <result property="groupRecipient"    column="group_recipient"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectGroupVo">
+        select id, group_name, group_leader_name, group_leader_phone, group_company_name, group_fax, group_phone, group_mobile, group_recipient, create_time, create_by, update_time, update_by, remark from travel_group
+    </sql>
+</mapper>
