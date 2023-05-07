@@ -83,7 +83,8 @@ public class GroupController extends BaseController
     @Log(title = "组团社信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Group group) {
-        return toAjax(groupService.save(group));
+        groupService.save(group);
+        return AjaxResult.success(group);
     }
 
     /**
