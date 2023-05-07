@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.ProjectMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.Project" id="ProjectResult">
+        <result property="id"    column="id"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectSuggestedPrice"    column="project_suggested_price"    />
+        <result property="projectCost"    column="project_cost"    />
+        <result property="projectType"    column="project_type"    />
+        <result property="projectUnit"    column="project_unit"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectProjectVo">
+        select id, project_name, project_suggested_price, project_cost, project_type, project_unit, create_time, create_by, update_time, update_by, remark, from travel_project
+    </sql>
+</mapper>

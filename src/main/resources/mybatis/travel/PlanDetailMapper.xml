@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.PlanDetailMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.PlanDetail" id="PlanDetailResult">
+        <result property="id"    column="id"    />
+        <result property="operationPlanId"    column="operation_plan_id"    />
+        <result property="travelScheduleId"    column="travel_schedule_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="planType"    column="plan_type"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectCost"    column="project_cost"    />
+        <result property="projectQuantity"    column="project_quantity"    />
+        <result property="projectUnit"    column="project_unit"    />
+        <result property="planAmount"    column="plan_amount"    />
+        <result property="planCash"    column="plan_cash"    />
+        <result property="planCard"    column="plan_card"    />
+        <result property="planTransfer"    column="plan_transfer"    />
+        <result property="planOffset"    column="plan_offset"    />
+        <result property="planCredit"    column="plan_credit"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectPlanDetailVo">
+        select id, operation_plan_id, travel_schedule_id, project_id, plan_type, project_name, project_cost, project_quantity, project_unit, plan_amount, plan_cash, plan_card, plan_transfer, plan_offset, plan_credit, create_time, create_by, update_time, update_by, remark, from travel_plan_detail
+    </sql>
+</mapper>
