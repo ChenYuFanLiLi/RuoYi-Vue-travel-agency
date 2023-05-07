@@ -2,7 +2,11 @@ package com.ruoyi.travel.controller;
 
 import java.util.List;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
+import com.ruoyi.travel.domain.Booking;
+import com.ruoyi.travel.service.IBookingService;
+import com.ruoyi.travel.service.IItineraryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +44,10 @@ public class CustomerController extends BaseController
 {
     private final ICustomerService customerService;
 
+//    private final IItineraryService itineraryService;
+
+    private final IBookingService bookingService;
+
     /**
      * 查询客户信息列表
      */
@@ -49,6 +57,20 @@ public class CustomerController extends BaseController
     public TableDataInfo list(Customer customer) {
         startPage();
         List<Customer> list = customerService.list(new QueryWrapper<Customer>(customer));
+        return getDataTable(list);
+    }
+
+    @ApiOperation("通过行程Id查询客户信息列表")
+    @PreAuthorize("@ss.hasPermi('travel:customer:list')")
+    @GetMapping("/listByItineraryId")
+    public TableDataInfo listByItineraryId(Long itineraryId){
+        QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
+        bookingQueryWrapper.eq("itinerary_id",itineraryId);
+        List<Long> bookingList = bookingService.list(bookingQueryWrapper).stream().map(Booking::getId).collect(Collectors.toList());
+        QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
+        customerQueryWrapper.in("booking_id",bookingList);
+        startPage();
+        List<Customer> list = customerService.list(customerQueryWrapper);
         return getDataTable(list);
     }
 

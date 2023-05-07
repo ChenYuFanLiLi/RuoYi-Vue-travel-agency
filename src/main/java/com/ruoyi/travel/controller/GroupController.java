@@ -3,6 +3,7 @@ package com.ruoyi.travel.controller;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,9 @@ public class GroupController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(Group group) {
         startPage();
-        List<Group> list = groupService.list(new QueryWrapper<Group>(group));
+        QueryWrapper<Group> groupQueryWrapper = new QueryWrapper<>();
+        groupQueryWrapper.like(StringUtils.isNotEmpty(group.getGroupName()),"group_name",group.getGroupName());
+        List<Group> list = groupService.list(groupQueryWrapper);
         return getDataTable(list);
     }
 
