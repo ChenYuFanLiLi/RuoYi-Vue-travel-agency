@@ -10,4 +10,7 @@
      <tree path="/src/main/java/com/ruoyi/travel/controller/RouteInfoController.java" title="线路信息"/>
      <tree path="/src/main/java/com/ruoyi/travel/controller/SubjectController.java" title="项目"/>
      <tree path="/src/main/java/com/ruoyi/travel/controller/VehicleController.java" title="车辆信息"/>
- </trees>
+     <tree path="/src/main/java/com/ruoyi/travel/controller/ItineraryController.java" title="行程表"/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/GroupController.java" title="组团社信息"/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/BookingController.java" title="收客记录"/>
+</trees>

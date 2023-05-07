@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.ItineraryMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.Itinerary" id="ItineraryResult">
+        <result property="id"    column="id"    />
+        <result property="itineraryName"    column="itinerary_name"    />
+        <result property="itineraryShortName"    column="itinerary_short_name"    />
+        <result property="scheduleName"    column="schedule_name"    />
+        <result property="scheduleDays"    column="schedule_days"    />
+        <result property="scheduleDescription"    column="schedule_description"    />
+        <result property="itinerarySchedule"    column="itinerary_schedule"    />
+        <result property="planQuantity"    column="plan_quantity"    />
+        <result property="departureDate"    column="departure_date"    />
+        <result property="clientBrief"    column="client_brief"    />
+        <result property="itineraryDocument"    column="itinerary_document"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectItineraryVo">
+        select id, itinerary_name, itinerary_short_name, schedule_name, schedule_days, schedule_description, itinerary_schedule, plan_quantity, departure_date, client_brief, itinerary_document, create_time, create_by, update_time, update_by, remark from travel_itinerary
+    </sql>
+</mapper>
