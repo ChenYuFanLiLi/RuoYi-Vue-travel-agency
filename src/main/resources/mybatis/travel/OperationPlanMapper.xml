@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.OperationPlanMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.OperationPlan" id="OperationPlanResult">
+        <result property="id"    column="id"    />
+        <result property="itineraryId"    column="itinerary_id"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="groupNumber"    column="group_number"    />
+        <result property="planDepartureDate"    column="plan_departure_date"    />
+        <result property="guideName"    column="guide_name"    />
+        <result property="guidePhone"    column="guide_phone"    />
+        <result property="driverPhone"    column="driver_phone"    />
+        <result property="driverName"    column="driver_name"    />
+        <result property="carNumber"    column="car_number"    />
+        <result property="plannerName"    column="planner_name"    />
+        <result property="plannerPhone"    column="planner_phone"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectOperationPlanVo">
+        select id, itinerary_id, team_id, group_number, plan_departure_date, guide_name, guide_phone, driver_phone, driver_name, car_number, planner_name, planner_phone, create_time, create_by, update_time, update_by, remark from travel_operation_plan
+    </sql>
+</mapper>
