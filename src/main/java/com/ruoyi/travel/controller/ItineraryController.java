@@ -26,6 +26,8 @@ import com.ruoyi.travel.service.IItineraryService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 行程Controller
  * 
@@ -58,11 +60,11 @@ public class ItineraryController extends BaseController
     @ApiOperation("导出行程列表")
     @PreAuthorize("@ss.hasPermi('travel:itinerary:export')")
     @Log(title = "行程", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    public AjaxResult export(Itinerary itinerary) {
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, Itinerary itinerary) {
         List<Itinerary> list = itineraryService.list(new QueryWrapper<Itinerary>(itinerary));
         ExcelUtil<Itinerary> util = new ExcelUtil<Itinerary>(Itinerary.class);
-        return util.exportExcel(list, "行程数据");
+        util.exportExcel(response,list, "行程数据");
     }
 
     /**
