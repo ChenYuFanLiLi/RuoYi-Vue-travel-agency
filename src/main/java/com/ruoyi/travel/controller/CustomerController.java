@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.travel.domain.Booking;
+import com.ruoyi.travel.dto.CustomerDTO;
 import com.ruoyi.travel.service.IBookingService;
 import com.ruoyi.travel.service.IItineraryService;
+import io.netty.util.internal.StringUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -63,12 +66,15 @@ public class CustomerController extends BaseController
     @ApiOperation("通过行程Id查询客户信息列表")
     @PreAuthorize("@ss.hasPermi('travel:customer:list')")
     @GetMapping("/listByItineraryId")
-    public TableDataInfo listByItineraryId(Long itineraryId){
+    public TableDataInfo listByItineraryId(CustomerDTO customerDTO){
         QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
-        bookingQueryWrapper.eq("itinerary_id",itineraryId);
+        bookingQueryWrapper.eq("itinerary_id",customerDTO.getItineraryId());
         List<Long> bookingList = bookingService.list(bookingQueryWrapper).stream().map(Booking::getId).collect(Collectors.toList());
         QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
         customerQueryWrapper.in("booking_id",bookingList);
+        customerQueryWrapper.like(StringUtils.isNotEmpty(customerDTO.getCustomerName()),"customer_name",customerDTO.getCustomerName());
+        customerQueryWrapper.like(StringUtils.isNotEmpty(customerDTO.getCustomerIdNumber()),"customer_id_number",customerDTO.getCustomerIdNumber());
+        customerQueryWrapper.like(StringUtils.isNotEmpty(customerDTO.getCustomerContactInfo()),"customer_contact_info",customerDTO.getCustomerContactInfo());
         startPage();
         List<Customer> list = customerService.list(customerQueryWrapper);
         return getDataTable(list);
