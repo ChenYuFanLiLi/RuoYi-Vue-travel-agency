@@ -13,4 +13,5 @@
      <tree path="/src/main/java/com/ruoyi/travel/controller/ItineraryController.java" title="行程表"/>
     <tree path="/src/main/java/com/ruoyi/travel/controller/GroupController.java" title="组团社信息"/>
     <tree path="/src/main/java/com/ruoyi/travel/controller/BookingController.java" title="收客记录"/>
+    <tree path="/src/main/java/com/ruoyi/travel/template" title="导入模板"/>
 </trees>

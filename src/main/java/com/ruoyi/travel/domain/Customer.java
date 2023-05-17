@@ -24,6 +24,9 @@ public class Customer extends MybatisPlusBaseEntity implements Serializable{
     /** 客户信息ID */
     private Long id;
 
+
+    private Long itineraryId;
+
     /** 收客记录ID */
     @Excel(name = "收客记录ID")
     private Long bookingId;
@@ -37,7 +40,7 @@ public class Customer extends MybatisPlusBaseEntity implements Serializable{
     private String customerName;
 
     /** 证件类型 */
-    @Excel(name = "证件类型")
+    @Excel(name = "证件类型",dictType="travel_customer_idtype")
     private String customerIdType;
 
     /** 证件号码 */
