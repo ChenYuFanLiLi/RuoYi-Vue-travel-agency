@@ -1,8 +1,13 @@
 package com.ruoyi.travel.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
+import com.alibaba.fastjson2.JSONObject;
+import com.ruoyi.travel.domain.Itinerary;
+import com.ruoyi.travel.service.IItineraryService;
+import com.ruoyi.travel.service.IOperationPlanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +46,26 @@ import javax.servlet.http.HttpServletResponse;
 public class CostAccountingController extends BaseController
 {
     private final ICostAccountingService costAccountingService;
+    private final IItineraryService itineraryService;
+
+    @ApiOperation("查询未选择行程表")
+    @PreAuthorize("@ss.hasPermi('travel:itinerary:list')")
+    @GetMapping("/listItinerary")
+    public List<JSONObject> listItinerary() {
+        QueryWrapper<Itinerary> queryWrapper = new QueryWrapper<>();
+        queryWrapper.notExists("select 1 from travel_cost_accounting tca where tca.itinerary_id = travel_itinerary.id");
+        List<Itinerary> list = itineraryService.list(queryWrapper);
+
+        List<JSONObject> return_list = new ArrayList<>();
+
+        for (Itinerary temp:list){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("value",temp.getId()); //主键作为多选框的值
+            jsonObject.put("label",temp.getItineraryName()); //名称作为多选框的标签
+            return_list.add(jsonObject);
+        }
+        return return_list;
+    }
 
     /**
      * 查询成本核算，用于记录团队成本核算信息列表

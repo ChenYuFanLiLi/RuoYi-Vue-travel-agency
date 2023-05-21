@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.travel.domain.Itinerary;
@@ -14,6 +15,7 @@ import com.ruoyi.travel.service.IItineraryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +52,7 @@ public class OperationPlanController extends BaseController
 {
     private final IOperationPlanService operationPlanService;
     private final IItineraryService itineraryService;
+    private final RedisTemplate redisTemplate;
     /**
      * 查询未选择行程表
      */
@@ -117,15 +120,39 @@ public class OperationPlanController extends BaseController
     public AjaxResult add(@RequestBody OperationPlan operationPlan) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateString = formatter.format(operationPlan.getPlanDepartureDate());
+        String prefix = "JSJ-"+dateString+"-";
 
-        QueryWrapper<OperationPlan> queryWrapper = new QueryWrapper<>();
-        queryWrapper.apply("date(plan_departure_date) = {0}", operationPlan.getPlanDepartureDate());
-        Integer team_no = operationPlanService.count(queryWrapper);
+        String key = "plan_add_key"+dateString;
+        String lockKey = "plan_add_lock"+dateString;
 
-        //大于三位数会正常输出
-        String team_id = "JSJ-"+dateString+"-"+String.format("%03d", team_no + 1);
-        operationPlan.setTeamId(team_id);
-        return toAjax(operationPlanService.save(operationPlan));
+        //死锁，等待addKey释放
+        while(true){
+            Boolean lock = redisTemplate.opsForValue().setIfAbsent(lockKey,"锁定中",10, TimeUnit.SECONDS);
+            if(lock != null && lock){
+                if(!redisTemplate.hasKey(key)){
+                    QueryWrapper<OperationPlan> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.apply("date(plan_departure_date) = {0}", operationPlan.getPlanDepartureDate());
+                    queryWrapper.orderByDesc("create_time").last("limit 1");
+                    OperationPlan temp = operationPlanService.getOne(queryWrapper);
+                    if(temp != null){
+                        String keyValue = temp.getTeamId().substring(prefix.length());
+                        redisTemplate.opsForValue().set(key,Integer.valueOf(keyValue));
+                    }else {
+                        redisTemplate.opsForValue().set(key,0);
+                    }
+                }
+                String team_no_source = (String) redisTemplate.opsForValue().get(key);
+                Integer team_no = Integer.valueOf(team_no_source) + 1;
+                redisTemplate.opsForValue().set(key,team_no);
+                redisTemplate.delete(lockKey);
+
+                //大于三位数会正常输出
+                String team_id = prefix + String.format("%03d", team_no);
+                operationPlan.setTeamId(team_id);
+                return toAjax(operationPlanService.save(operationPlan));
+
+            }
+        }
     }
 
     /**

@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2023-05-21
  */
 @RestController
-@RequestMapping("/travel/detail")
+@RequestMapping("/travel/costdetail")
 @Api(value = "成本核算明细控制器", tags = {"成本核算明细管理"})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CostDetailController extends BaseController
@@ -46,7 +46,7 @@ public class CostDetailController extends BaseController
      * 查询成本核算明细列表
      */
     @ApiOperation("查询成本核算明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:detail:list')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:list')")
     @GetMapping("/list")
     public TableDataInfo list(CostDetail costDetail) {
         startPage();
@@ -58,7 +58,7 @@ public class CostDetailController extends BaseController
      * 导出成本核算明细列表
      */
     @ApiOperation("导出成本核算明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:detail:export')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:export')")
     @Log(title = "成本核算明细", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response,CostDetail costDetail) {
@@ -71,7 +71,7 @@ public class CostDetailController extends BaseController
      * 获取成本核算明细详细信息
      */
     @ApiOperation("获取成本核算明细详细信息")
-    @PreAuthorize("@ss.hasPermi('travel:detail:query')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(costDetailService.getById(id));
@@ -81,7 +81,7 @@ public class CostDetailController extends BaseController
      * 新增成本核算明细
      */
     @ApiOperation("新增成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:detail:add')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:add')")
     @Log(title = "成本核算明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CostDetail costDetail) {
@@ -92,7 +92,7 @@ public class CostDetailController extends BaseController
      * 修改成本核算明细
      */
     @ApiOperation("修改成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:detail:edit')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:edit')")
     @Log(title = "成本核算明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody CostDetail costDetail) {
@@ -103,7 +103,7 @@ public class CostDetailController extends BaseController
      * 删除成本核算明细
      */
     @ApiOperation("删除成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:detail:remove')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:remove')")
     @Log(title = "成本核算明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

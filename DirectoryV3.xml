@@ -14,4 +14,10 @@
     <tree path="/src/main/java/com/ruoyi/travel/controller/GroupController.java" title="组团社信息"/>
     <tree path="/src/main/java/com/ruoyi/travel/controller/BookingController.java" title="收客记录"/>
     <tree path="/src/main/java/com/ruoyi/travel/template" title="导入模板"/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/CostAccountingController.java" title="成本核算"/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/CostDetailController.java" title="成本核算明细"/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/PlanDetailController.java" title="操作计划明细" extension=""
+          presentableText="" tooltipTitle="" icon="" textColor="" backgroundColor=""/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/ProjectController.java" title="项目" extension=""
+          presentableText="" tooltipTitle="" icon="" textColor="" backgroundColor=""/>
 </trees>

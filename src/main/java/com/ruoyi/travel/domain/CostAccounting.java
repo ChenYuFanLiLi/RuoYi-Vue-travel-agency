@@ -31,6 +31,9 @@ public class CostAccounting extends MybatisPlusBaseEntity implements Serializabl
     @Excel(name = "操作计划")
     private Long operationPlanId;
 
+    @Excel(name = "行程")
+    private Long itineraryId;
+
     /** 团号 */
     @Excel(name = "团号")
     private String tourNumber;
