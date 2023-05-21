@@ -26,6 +26,8 @@ import com.ruoyi.travel.service.IProjectService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 项目Controller
  * 
@@ -59,10 +61,10 @@ public class ProjectController extends BaseController
     @PreAuthorize("@ss.hasPermi('travel:project:export')")
     @Log(title = "项目", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(Project project) {
+    public void export(HttpServletResponse response, Project project) {
         List<Project> list = projectService.list(new QueryWrapper<Project>(project));
         ExcelUtil<Project> util = new ExcelUtil<Project>(Project.class);
-        return util.exportExcel(list, "项目数据");
+        util.exportExcel(response ,list, "项目数据");
     }
 
     /**

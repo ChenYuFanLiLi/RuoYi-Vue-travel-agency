@@ -26,6 +26,8 @@ import com.ruoyi.travel.service.IPlanDetailService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 计划项目明细Controller
  * 
@@ -59,10 +61,10 @@ public class PlanDetailController extends BaseController
     @PreAuthorize("@ss.hasPermi('travel:planDetail:export')")
     @Log(title = "计划项目明细", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(PlanDetail planDetail) {
+    public void export(HttpServletResponse response, PlanDetail planDetail) {
         List<PlanDetail> list = planDetailService.list(new QueryWrapper<PlanDetail>(planDetail));
         ExcelUtil<PlanDetail> util = new ExcelUtil<PlanDetail>(PlanDetail.class);
-        return util.exportExcel(list, "计划项目明细数据");
+        util.exportExcel(response ,list, "计划项目明细数据");
     }
 
     /**

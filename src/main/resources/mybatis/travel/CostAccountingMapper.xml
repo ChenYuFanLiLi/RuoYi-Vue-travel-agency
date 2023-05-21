@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.CostAccountingMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.CostAccounting" id="CostAccountingResult">
+        <result property="id"    column="id"    />
+        <result property="operationPlanId"    column="operation_plan_id"    />
+        <result property="tourNumber"    column="tour_number"    />
+        <result property="departureDate"    column="departure_date"    />
+        <result property="teamNumber"    column="team_number"    />
+        <result property="costTotalTransfer"    column="cost_total_transfer"    />
+        <result property="costGuideAdvance"    column="cost_guide_advance"    />
+        <result property="costReimbursementDetail"    column="cost_reimbursement_detail"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectCostAccountingVo">
+        select id, operation_plan_id, tour_number, departure_date, team_number, cost_total_transfer, cost_guide_advance, cost_reimbursement_detail, create_time, create_by, update_time, update_by, remark, from travel_cost_accounting
+    </sql>
+</mapper>

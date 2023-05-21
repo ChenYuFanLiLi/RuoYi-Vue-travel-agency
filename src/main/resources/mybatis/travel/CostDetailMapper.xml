@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.CostDetailMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.CostDetail" id="CostDetailResult">
+        <result property="id"    column="id"    />
+        <result property="planDetailId"    column="plan_detail_id"    />
+        <result property="travelScheduleId"    column="travel_schedule_id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="planType"    column="plan_type"    />
+        <result property="projectName"    column="project_name"    />
+        <result property="projectCost"    column="project_cost"    />
+        <result property="projectAmount"    column="project_amount"    />
+        <result property="projectUnit"    column="project_unit"    />
+        <result property="costAmount"    column="cost_amount"    />
+        <result property="costCash"    column="cost_cash"    />
+        <result property="costCard"    column="cost_card"    />
+        <result property="costTransfer"    column="cost_transfer"    />
+        <result property="costOffset"    column="cost_offset"    />
+        <result property="costOnCredit"    column="cost_on_credit"    />
+        <result property="costVoucher"    column="cost_voucher"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectCostDetailVo">
+        select id, plan_detail_id, travel_schedule_id, project_id, plan_type, project_name, project_cost, project_amount, project_unit, cost_amount, cost_cash, cost_card, cost_transfer, cost_offset, cost_on_credit, cost_voucher, create_time, create_by, update_time, update_by, remark, from travel_cost_detail
+    </sql>
+</mapper>

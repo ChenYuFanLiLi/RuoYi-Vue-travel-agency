@@ -34,6 +34,8 @@ import com.ruoyi.travel.service.IOperationPlanService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 操作计划Controller
  * 
@@ -88,11 +90,11 @@ public class OperationPlanController extends BaseController
     @ApiOperation("导出操作计划列表")
     @PreAuthorize("@ss.hasPermi('travel:plan:export')")
     @Log(title = "操作计划", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    public AjaxResult export(OperationPlan operationPlan) {
+    @RequestMapping("/export")
+    public void export(HttpServletResponse response,OperationPlan operationPlan) {
         List<OperationPlan> list = operationPlanService.list(new QueryWrapper<OperationPlan>(operationPlan));
         ExcelUtil<OperationPlan> util = new ExcelUtil<OperationPlan>(OperationPlan.class);
-        return util.exportExcel(list, "操作计划数据");
+        util.exportExcel(response ,list, "plan");
     }
 
     /**
