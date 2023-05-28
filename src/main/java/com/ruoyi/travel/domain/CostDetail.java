@@ -25,8 +25,8 @@ public class CostDetail extends MybatisPlusBaseEntity implements Serializable{
     /** 主键 */
     private Long id;
 
-    /** 计划项目 */
-    private Long planDetailId;
+    /** 成本核算ID */
+    private Long operationCostId;
 
     /** 行程ID */
     @Excel(name = "行程ID")

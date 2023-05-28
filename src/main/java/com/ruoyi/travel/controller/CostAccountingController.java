@@ -3,11 +3,11 @@ package com.ruoyi.travel.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.ruoyi.travel.domain.Itinerary;
-import com.ruoyi.travel.service.IItineraryService;
-import com.ruoyi.travel.service.IOperationPlanService;
+import com.ruoyi.travel.domain.*;
+import com.ruoyi.travel.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,6 @@ import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
-import com.ruoyi.travel.domain.CostAccounting;
-import com.ruoyi.travel.service.ICostAccountingService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
@@ -47,23 +45,35 @@ public class CostAccountingController extends BaseController
 {
     private final ICostAccountingService costAccountingService;
     private final IItineraryService itineraryService;
+    private final IOperationPlanService operationPlanService;
+    private final IPlanDetailService planDetailService;
+    private final ICostDetailService costDetailService;
+    /**
+     * 查询行程，团号，出发日期，团队编号汇总
+     * @return
+     */
 
     @ApiOperation("查询未选择行程表")
     @PreAuthorize("@ss.hasPermi('travel:itinerary:list')")
     @GetMapping("/listItinerary")
     public List<JSONObject> listItinerary() {
-        QueryWrapper<Itinerary> queryWrapper = new QueryWrapper<>();
-        queryWrapper.notExists("select 1 from travel_cost_accounting tca where tca.itinerary_id = travel_itinerary.id");
-        List<Itinerary> list = itineraryService.list(queryWrapper);
+        List<OperationPlan> list = operationPlanService.list(new QueryWrapper<OperationPlan>()
+                .notInSql("id", "select itinerary_id from travel_cost_accounting"));
 
         List<JSONObject> return_list = new ArrayList<>();
 
-        for (Itinerary temp:list){
+        for (OperationPlan temp:list){
+            Itinerary itinerary = itineraryService.getById(temp.getItineraryId());
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("value",temp.getId()); //主键作为多选框的值
-            jsonObject.put("label",temp.getItineraryName()); //名称作为多选框的标签
+            jsonObject.put("value",itinerary.getId()); //主键作为多选框的值
+            jsonObject.put("label",itinerary.getItineraryName()); //名称作为多选框的标签
+            jsonObject.put("team_id",temp.getTeamId()); //团队编号
+            jsonObject.put("group_number",temp.getGroupNumber()); //团号
+            jsonObject.put("plan_departure_date",temp.getPlanDepartureDate()); //出发日期
+            jsonObject.put("operation_plan_id",temp.getId());
             return_list.add(jsonObject);
         }
+
         return return_list;
     }
 
@@ -110,7 +120,34 @@ public class CostAccountingController extends BaseController
     @Log(title = "成本核算，用于记录团队成本核算信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CostAccounting costAccounting) {
-        return toAjax(costAccountingService.save(costAccounting));
+        costAccountingService.save(costAccounting);
+//        成本核算创建时，自动导入操作计划明细
+        List<PlanDetail> planDetailList = planDetailService.list(new QueryWrapper<PlanDetail>()
+                .eq("operation_plan_id",costAccounting.getOperationPlanId()));
+        Long id = costAccountingService.getOne(
+                        new QueryWrapper<CostAccounting>()
+                                .eq("itinerary_id",costAccounting.getItineraryId()))
+                        .getId();
+        for (PlanDetail planDetail:planDetailList){
+            CostDetail costDetail = new CostDetail();
+            costDetail.setOperationCostId(id);
+            costDetail.setTravelScheduleId(planDetail.getTravelScheduleId());
+            costDetail.setProjectId(String.valueOf(planDetail.getProjectId()));
+            costDetail.setPlanType(planDetail.getPlanType());
+            costDetail.setProjectName(planDetail.getProjectName());
+            costDetail.setProjectCost(planDetail.getProjectCost());
+            costDetail.setProjectAmount(planDetail.getProjectQuantity());
+            costDetail.setProjectUnit(planDetail.getProjectUnit());
+            costDetail.setCostAmount(planDetail.getPlanAmount());
+            costDetail.setCostCash(planDetail.getPlanCash());
+            costDetail.setCostCard(planDetail.getPlanCard());
+            costDetail.setCostTransfer(planDetail.getPlanTransfer());
+            costDetail.setCostOffset(planDetail.getPlanOffset());
+            costDetail.setCostOnCredit(planDetail.getPlanCredit());
+            costDetail.setCostOnCredit(planDetail.getPlanCredit());
+            costDetailService.save(costDetail);
+        }
+        return AjaxResult.success("1");
     }
 
     /**
