@@ -1,7 +1,10 @@
 package com.ruoyi.travel.service.impl;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.travel.vo.ItineraryVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.travel.mapper.ItineraryMapper;
@@ -18,4 +21,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 @Service
 public class ItineraryServiceImpl extends ServiceImpl<ItineraryMapper, Itinerary> implements IItineraryService {
 
+    @Override
+    public List<ItineraryVO> listVO(QueryWrapper<Itinerary> itineraryQueryWrapper) {
+        return null;
+    }
 }

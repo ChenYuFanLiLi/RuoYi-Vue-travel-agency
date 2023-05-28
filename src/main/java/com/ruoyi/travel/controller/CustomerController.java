@@ -79,8 +79,6 @@ public class CustomerController extends BaseController
     @PreAuthorize("@ss.hasPermi('travel:customer:list')")
     @GetMapping("/listByItineraryId")
     public TableDataInfo listByItineraryId(CustomerDTO customerDTO){
-        //        List<CustomerVO> list = customerService.listByItineraryId(customerDTO);
-
         QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
         bookingQueryWrapper.eq("itinerary_id",customerDTO.getItineraryId());
         List<Long> bookingList = bookingService.list(bookingQueryWrapper).stream().map(Booking::getId).collect(Collectors.toList());
@@ -186,6 +184,5 @@ public class CustomerController extends BaseController
         }else {
             return AjaxResult.error("导入失败，请检查是否依据模板导入，或数据格式不正确");
         }
-
     }
 }

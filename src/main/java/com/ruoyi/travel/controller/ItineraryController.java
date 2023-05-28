@@ -1,11 +1,16 @@
 package com.ruoyi.travel.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.travel.domain.Booking;
+import com.ruoyi.travel.service.IBookingService;
+import com.ruoyi.travel.vo.ItineraryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +47,8 @@ public class ItineraryController extends BaseController
 {
     private final IItineraryService itineraryService;
 
+    private final IBookingService bookingService;
+
     /**
      * 查询行程列表
      */
@@ -51,7 +58,18 @@ public class ItineraryController extends BaseController
     public TableDataInfo list(Itinerary itinerary) {
         startPage();
         List<Itinerary> list = itineraryService.list(new QueryWrapper<Itinerary>(itinerary));
-        return getDataTable(list);
+        List<ItineraryVO> listVO = itineraryService.listVO(new QueryWrapper<>(itinerary));
+        TableDataInfo dataTable = getDataTable(list);
+        ArrayList<ItineraryVO> itineraryVOList = new ArrayList<>();
+        list.forEach(item->{
+            ItineraryVO itineraryVO = new ItineraryVO();
+            BeanUtils.copyProperties(item,itineraryVO);
+            QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
+            bookingQueryWrapper.eq("itinerary_id",item.getId());
+            List<Booking> bookingList = bookingService.list(bookingQueryWrapper);
+
+        });
+        return dataTable;
     }
 
     /**
