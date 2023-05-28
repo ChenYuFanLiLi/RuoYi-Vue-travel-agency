@@ -3,9 +3,12 @@ package com.ruoyi.travel.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import com.ruoyi.travel.domain.Booking;
+import com.ruoyi.travel.domain.Customer;
 import com.ruoyi.travel.service.IBookingService;
+import com.ruoyi.travel.service.ICustomerService;
 import com.ruoyi.travel.vo.ItineraryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,6 +52,8 @@ public class ItineraryController extends BaseController
 
     private final IBookingService bookingService;
 
+    private final ICustomerService customerService;
+
     /**
      * 查询行程列表
      */
@@ -67,8 +72,21 @@ public class ItineraryController extends BaseController
             QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
             bookingQueryWrapper.eq("itinerary_id",item.getId());
             List<Booking> bookingList = bookingService.list(bookingQueryWrapper);
+            itineraryVO.setItineraryObligate(bookingList.stream().mapToLong(Booking::getBookingCount).summaryStatistics().getSum());
+            QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
+            customerQueryWrapper.eq("itinerary_id",item.getId()).or().in("booking_id",bookingList.stream().map(Booking::getId).collect(Collectors.toList()));
+            itineraryVO.setItineraryConfirm((long) customerService.count(customerQueryWrapper));
 
+            if (Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())>=item.getPlanQuantity()){
+                itineraryVO.setItineraryRemaining(0L);
+                itineraryVO.setItineraryOverCollection(Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())-item.getPlanQuantity());
+            }else {
+                itineraryVO.setItineraryOverCollection(0L);
+                itineraryVO.setItineraryRemaining(item.getPlanQuantity()-Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm()));
+            }
+            itineraryVOList.add(itineraryVO);
         });
+        dataTable.setRows(itineraryVOList);
         return dataTable;
     }
 

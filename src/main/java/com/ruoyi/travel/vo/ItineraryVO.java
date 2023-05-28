@@ -14,4 +14,9 @@ public class ItineraryVO extends Itinerary {
     /** 确认或有名单人数 */
     private Long itineraryConfirm;
 
+    /** 余位 */
+    private Long itineraryRemaining;
+
+    /** 超收 */
+    private Long itineraryOverCollection;
 }
