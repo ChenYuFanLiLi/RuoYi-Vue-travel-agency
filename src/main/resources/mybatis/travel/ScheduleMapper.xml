@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.ScheduleMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.Schedule" id="ScheduleResult">
+        <result property="id"    column="id"    />
+        <result property="scheduleName"    column="schedule_name"    />
+        <result property="scheduleDays"    column="schedule_days"    />
+        <result property="scheduleDescription"    column="schedule_description"    />
+        <result property="itinerarySchedule"    column="itinerary_schedule"    />
+        <result property="itineraryOrder"    column="itinerary_order"    />
+        <result property="accommodationPlace"    column="accommodation_place"    />
+        <result property="mealInfo"    column="meal_info"    />
+        <result property="price"    column="price"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap id="ScheduleScheduleRoutingResult" type="com.ruoyi.travel.domain.Schedule" extends="ScheduleResult">
+        <collection property="scheduleRoutingList" notNullColumn="sub_id" javaType="java.util.List" resultMap="ScheduleRoutingResult" />
+    </resultMap>
+
+    <resultMap type="ScheduleRouting" id="ScheduleRoutingResult">
+        <result property="id"    column="sub_id"    />
+        <result property="scheduleId"    column="sub_schedule_id"    />
+        <result property="routingContent"    column="sub_routing_content"    />
+        <result property="routingOrder"    column="sub_routing_order"    />
+        <result property="routingPlace"    column="sub_routing_place"    />
+        <result property="routingMeal"    column="sub_routing_meal"    />
+        <result property="createTime"    column="sub_create_time"    />
+        <result property="createBy"    column="sub_create_by"    />
+        <result property="updateTime"    column="sub_update_time"    />
+        <result property="updateBy"    column="sub_update_by"    />
+        <result property="remark"    column="sub_remark"    />
+    </resultMap>
+
+    <sql id="selectScheduleVo">
+        select id, schedule_name, schedule_days, schedule_description, itinerary_schedule, itinerary_order, accommodation_place, meal_info, price, create_time, create_by, update_time, update_by, remark from travel_schedule
+    </sql>
+</mapper>

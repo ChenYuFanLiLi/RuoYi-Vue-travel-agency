@@ -1,11 +1,16 @@
 package com.ruoyi.travel.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.travel.domain.Customer;
+import com.ruoyi.travel.service.ICustomerService;
+import com.ruoyi.travel.vo.BookingVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +45,9 @@ public class BookingController extends BaseController
 {
     private final IBookingService bookingService;
 
+    private final ICustomerService customerService;
+
+
     /**
      * 查询收客记录列表
      */
@@ -49,7 +57,18 @@ public class BookingController extends BaseController
     public TableDataInfo list(Booking booking) {
         startPage();
         List<Booking> list = bookingService.list(new QueryWrapper<Booking>(booking));
-        return getDataTable(list);
+        List<BookingVO> bookingVOList = new ArrayList<>();
+        list.forEach(item->{
+            BookingVO bookingVO = new BookingVO();
+            BeanUtils.copyProperties(item,bookingVO);
+            QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
+            customerQueryWrapper.eq("booking_id",item.getId());
+            bookingVO.setCustomerCount((long)customerService.count(customerQueryWrapper));
+            bookingVOList.add(bookingVO);
+        });
+        TableDataInfo dataTable = getDataTable(list);
+        dataTable.setRows(bookingVOList);
+        return dataTable;
     }
 
     /**

@@ -20,4 +20,5 @@
           presentableText="" tooltipTitle="" icon="" textColor="" backgroundColor=""/>
     <tree path="/src/main/java/com/ruoyi/travel/controller/ProjectController.java" title="项目" extension=""
           presentableText="" tooltipTitle="" icon="" textColor="" backgroundColor=""/>
+    <tree path="/src/main/java/com/ruoyi/travel/controller/ScheduleController.java" title="线路"/>
 </trees>

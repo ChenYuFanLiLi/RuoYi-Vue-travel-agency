@@ -66,7 +66,7 @@ public class ItineraryController extends BaseController
     public TableDataInfo list(Itinerary itinerary) {
         startPage();
         List<Itinerary> list = itineraryService.list(new QueryWrapper<Itinerary>(itinerary));
-        List<ItineraryVO> listVO = itineraryService.listVO(new QueryWrapper<>(itinerary));
+//        List<ItineraryVO> listVO = itineraryService.listVO(new QueryWrapper<>(itinerary));
         TableDataInfo dataTable = getDataTable(list);
         ArrayList<ItineraryVO> itineraryVOList = new ArrayList<>();
         list.forEach(item->{
@@ -87,24 +87,47 @@ public class ItineraryController extends BaseController
                     builder.append(booking.getGroupLeaderName());
                     builder.append(":");
                     builder.append(booking.getBookingCount());
+                    builder.append("人");
                     if (booking.getBookerId()!=null){
-                        String nickName = sysUserService.selectUserById(booking.getBookerId()).getNickName();
+                        String nickName ="("+ sysUserService.selectUserById(booking.getBookerId()).getNickName()+")";
                         builder.append(nickName);
                     }else {
                         builder.append("未知");
                     }
-                    builder.append(";");
+                    builder.append("， ");
                 });
                 itineraryVO.setClientBrief(builder.toString());
-                if (Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())>=item.getPlanQuantity()){
+
+                //客户数
+                Long customerNum = 0L;
+
+                for (Booking booking : bookingList) {
+                    Long bookingCustomerNum = 0L;
+                    QueryWrapper<Customer> customerQueryWrapper1 = new QueryWrapper<>();
+                    customerQueryWrapper1.eq("booking_id", booking.getId());
+                    int count = customerService.count(customerQueryWrapper1);
+                    if (booking.getBookingCount() <= count) {
+                        bookingCustomerNum = (long) count;
+                    } else {
+                        bookingCustomerNum = booking.getBookingCount();
+                    }
+                    customerNum+=bookingCustomerNum;
+                }
+
+                QueryWrapper<Customer> customerQueryWrapper1 = new QueryWrapper<>();
+                customerQueryWrapper1.eq("itinerary_id",item.getId());
+                int count = customerService.count(customerQueryWrapper1);
+                customerNum +=(long) count;
+
+                if (customerNum>=item.getPlanQuantity()){
                     itineraryVO.setItineraryRemaining(0L);
-                    itineraryVO.setItineraryOverCollection(Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())-item.getPlanQuantity());
+                    itineraryVO.setItineraryOverCollection(customerNum-item.getPlanQuantity());
                 }else {
                     itineraryVO.setItineraryOverCollection(0L);
-                    itineraryVO.setItineraryRemaining(item.getPlanQuantity()-Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm()));
+                    itineraryVO.setItineraryRemaining(item.getPlanQuantity()-customerNum);
                 }
-                itineraryVOList.add(itineraryVO);
             }
+            itineraryVOList.add(itineraryVO);
         });
         dataTable.setRows(itineraryVOList);
         return dataTable;
