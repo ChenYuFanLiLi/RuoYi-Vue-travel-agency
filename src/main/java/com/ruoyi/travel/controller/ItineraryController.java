@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import com.ruoyi.project.system.service.ISysUserService;
 import com.ruoyi.travel.domain.Booking;
 import com.ruoyi.travel.domain.Customer;
 import com.ruoyi.travel.service.IBookingService;
@@ -54,6 +55,8 @@ public class ItineraryController extends BaseController
 
     private final ICustomerService customerService;
 
+    private final ISysUserService sysUserService;
+
     /**
      * 查询行程列表
      */
@@ -72,19 +75,36 @@ public class ItineraryController extends BaseController
             QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
             bookingQueryWrapper.eq("itinerary_id",item.getId());
             List<Booking> bookingList = bookingService.list(bookingQueryWrapper);
-            itineraryVO.setItineraryObligate(bookingList.stream().mapToLong(Booking::getBookingCount).summaryStatistics().getSum());
-            QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
-            customerQueryWrapper.eq("itinerary_id",item.getId()).or().in("booking_id",bookingList.stream().map(Booking::getId).collect(Collectors.toList()));
-            itineraryVO.setItineraryConfirm((long) customerService.count(customerQueryWrapper));
-
-            if (Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())>=item.getPlanQuantity()){
-                itineraryVO.setItineraryRemaining(0L);
-                itineraryVO.setItineraryOverCollection(Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())-item.getPlanQuantity());
-            }else {
-                itineraryVO.setItineraryOverCollection(0L);
-                itineraryVO.setItineraryRemaining(item.getPlanQuantity()-Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm()));
+            if (bookingList.size()>0){
+                itineraryVO.setItineraryObligate(bookingList.stream().mapToLong(Booking::getBookingCount).summaryStatistics().getSum());
+                QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
+                customerQueryWrapper.eq("itinerary_id",item.getId()).or().in("booking_id",bookingList.stream().map(Booking::getId).collect(Collectors.toList()));
+                itineraryVO.setItineraryConfirm((long) customerService.count(customerQueryWrapper));
+                StringBuilder builder = new StringBuilder();
+                bookingList.forEach(booking->{
+                    builder.append(booking.getGroupName());
+                    builder.append("-");
+                    builder.append(booking.getGroupLeaderName());
+                    builder.append(":");
+                    builder.append(booking.getBookingCount());
+                    if (booking.getBookerId()!=null){
+                        String nickName = sysUserService.selectUserById(booking.getBookerId()).getNickName();
+                        builder.append(nickName);
+                    }else {
+                        builder.append("未知");
+                    }
+                    builder.append(";");
+                });
+                itineraryVO.setClientBrief(builder.toString());
+                if (Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())>=item.getPlanQuantity()){
+                    itineraryVO.setItineraryRemaining(0L);
+                    itineraryVO.setItineraryOverCollection(Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm())-item.getPlanQuantity());
+                }else {
+                    itineraryVO.setItineraryOverCollection(0L);
+                    itineraryVO.setItineraryRemaining(item.getPlanQuantity()-Math.max(itineraryVO.getItineraryObligate(),itineraryVO.getItineraryConfirm()));
+                }
+                itineraryVOList.add(itineraryVO);
             }
-            itineraryVOList.add(itineraryVO);
         });
         dataTable.setRows(itineraryVOList);
         return dataTable;
