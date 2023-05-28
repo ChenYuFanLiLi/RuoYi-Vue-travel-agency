@@ -136,12 +136,12 @@ public class OperationPlanController extends BaseController
                     OperationPlan temp = operationPlanService.getOne(queryWrapper);
                     if(temp != null){
                         String keyValue = temp.getTeamId().substring(prefix.length());
-                        redisTemplate.opsForValue().set(key,Integer.valueOf(keyValue));
+                        redisTemplate.opsForValue().set(key,keyValue);
                     }else {
-                        redisTemplate.opsForValue().set(key,0);
+                        redisTemplate.opsForValue().set(key,"0");
                     }
                 }
-                String team_no_source = (String) redisTemplate.opsForValue().get(key);
+                String team_no_source = String.valueOf(redisTemplate.opsForValue().get(key));
                 Integer team_no = Integer.valueOf(team_no_source) + 1;
                 redisTemplate.opsForValue().set(key,team_no);
                 redisTemplate.delete(lockKey);
