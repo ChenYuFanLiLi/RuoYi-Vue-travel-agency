@@ -66,7 +66,6 @@ public class ItineraryController extends BaseController
     public TableDataInfo list(Itinerary itinerary) {
         startPage();
         List<Itinerary> list = itineraryService.list(new QueryWrapper<Itinerary>(itinerary));
-//        List<ItineraryVO> listVO = itineraryService.listVO(new QueryWrapper<>(itinerary));
         TableDataInfo dataTable = getDataTable(list);
         ArrayList<ItineraryVO> itineraryVOList = new ArrayList<>();
         list.forEach(item->{
