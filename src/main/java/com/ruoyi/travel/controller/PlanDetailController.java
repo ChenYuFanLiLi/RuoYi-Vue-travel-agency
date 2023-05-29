@@ -46,7 +46,7 @@ public class PlanDetailController extends BaseController
      * 查询计划项目明细列表
      */
     @ApiOperation("查询计划项目明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:list')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:list')")
     @GetMapping("/list")
     public TableDataInfo list(PlanDetail planDetail) {
         startPage();
@@ -58,7 +58,7 @@ public class PlanDetailController extends BaseController
      * 导出计划项目明细列表
      */
     @ApiOperation("导出计划项目明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:export')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:export')")
     @Log(title = "计划项目明细", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void export(HttpServletResponse response, PlanDetail planDetail) {
@@ -71,7 +71,7 @@ public class PlanDetailController extends BaseController
      * 获取计划项目明细详细信息
      */
     @ApiOperation("获取计划项目明细详细信息")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:query')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(planDetailService.getById(id));
@@ -81,7 +81,7 @@ public class PlanDetailController extends BaseController
      * 新增计划项目明细
      */
     @ApiOperation("新增计划项目明细")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:add')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:add')")
     @Log(title = "计划项目明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody PlanDetail planDetail) {
@@ -92,7 +92,7 @@ public class PlanDetailController extends BaseController
      * 修改计划项目明细
      */
     @ApiOperation("修改计划项目明细")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:edit')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:edit')")
     @Log(title = "计划项目明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody PlanDetail planDetail) {
@@ -103,7 +103,7 @@ public class PlanDetailController extends BaseController
      * 删除计划项目明细
      */
     @ApiOperation("删除计划项目明细")
-    @PreAuthorize("@ss.hasPermi('travel:planDetail:remove')")
+    @PreAuthorize("@ss.hasPermi('travel:plan:remove')")
     @Log(title = "计划项目明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
