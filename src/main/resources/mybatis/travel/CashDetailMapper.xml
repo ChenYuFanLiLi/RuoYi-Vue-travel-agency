@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.travel.mapper.CashDetailMapper">
+    
+    <resultMap type="com.ruoyi.travel.domain.CashDetail" id="CashDetailResult">
+        <result property="id"    column="id"    />
+        <result property="relatedId"    column="related_id"    />
+        <result property="cashProject"    column="cash_project"    />
+        <result property="cashUnitPrice"    column="cash_unit_price"    />
+        <result property="cashUnit"    column="cash_unit"    />
+        <result property="cashQuantity"    column="cash_quantity"    />
+        <result property="cashAmount"    column="cash_amount"    />
+        <result property="cashDiscount"    column="cash_discount"    />
+        <result property="cashType"    column="cash_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectCashDetailVo">
+        select id, related_id, cash_project, cash_unit_price, cash_unit, cash_quantity, cash_amount, cash_discount, cash_type, create_time, create_by, update_time, update_by, remark, from travel_cash_detail
+    </sql>
+</mapper>

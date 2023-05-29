@@ -21,92 +21,92 @@ import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
-import com.ruoyi.travel.domain.CostDetail;
-import com.ruoyi.travel.service.ICostDetailService;
+import com.ruoyi.travel.domain.CashDetail;
+import com.ruoyi.travel.service.ICashDetailService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
 
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 成本核算明细Controller
+ * 现金明细Controller
  * 
  * @author 陈宇凡
- * @date 2023-05-21
+ * @date 2023-05-30
  */
 @RestController
-@RequestMapping("/travel/costdetail")
-@Api(value = "成本核算明细控制器", tags = {"成本核算明细管理"})
+@RequestMapping("/travel/cashdetail")
+@Api(value = "现金明细控制器", tags = {"现金明细管理"})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class CostDetailController extends BaseController
+public class CashDetailController extends BaseController
 {
-    private final ICostDetailService costDetailService;
+    private final ICashDetailService cashDetailService;
 
     /**
-     * 查询成本核算明细列表
+     * 查询现金明细列表
      */
-    @ApiOperation("查询成本核算明细列表")
+    @ApiOperation("查询现金明细列表")
     @PreAuthorize("@ss.hasPermi('travel:accounting:list')")
     @GetMapping("/list")
-    public TableDataInfo list(CostDetail costDetail) {
+    public TableDataInfo list(CashDetail cashDetail) {
         startPage();
-        List<CostDetail> list = costDetailService.list(new QueryWrapper<CostDetail>(costDetail));
+        List<CashDetail> list = cashDetailService.list(new QueryWrapper<CashDetail>(cashDetail));
         return getDataTable(list);
     }
 
     /**
-     * 导出成本核算明细列表
+     * 导出现金明细列表
      */
-    @ApiOperation("导出成本核算明细列表")
+    @ApiOperation("导出现金明细列表")
     @PreAuthorize("@ss.hasPermi('travel:accounting:export')")
-    @Log(title = "成本核算明细", businessType = BusinessType.EXPORT)
+    @Log(title = "现金明细", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response,CostDetail costDetail) {
-        List<CostDetail> list = costDetailService.list(new QueryWrapper<CostDetail>(costDetail));
-        ExcelUtil<CostDetail> util = new ExcelUtil<CostDetail>(CostDetail.class);
-        util.exportExcel(response ,list, "成本核算明细数据");
+    public void export(HttpServletResponse response,CashDetail cashDetail) {
+        List<CashDetail> list = cashDetailService.list(new QueryWrapper<CashDetail>(cashDetail));
+        ExcelUtil<CashDetail> util = new ExcelUtil<CashDetail>(CashDetail.class);
+        util.exportExcel(response ,list, "现金明细数据");
     }
 
     /**
-     * 获取成本核算明细详细信息
+     * 获取现金明细详细信息
      */
-    @ApiOperation("获取成本核算明细详细信息")
+    @ApiOperation("获取现金明细详细信息")
     @PreAuthorize("@ss.hasPermi('travel:accounting:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        return AjaxResult.success(costDetailService.getById(id));
+        return AjaxResult.success(cashDetailService.getById(id));
     }
 
     /**
-     * 新增成本核算明细
+     * 新增现金明细
      */
-    @ApiOperation("新增成本核算明细")
+    @ApiOperation("新增现金明细")
     @PreAuthorize("@ss.hasPermi('travel:accounting:add')")
-    @Log(title = "成本核算明细", businessType = BusinessType.INSERT)
+    @Log(title = "现金明细", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CostDetail costDetail) {
-        return toAjax(costDetailService.save(costDetail));
+    public AjaxResult add(@RequestBody CashDetail cashDetail) {
+        return toAjax(cashDetailService.save(cashDetail));
     }
 
     /**
-     * 修改成本核算明细
+     * 修改现金明细
      */
-    @ApiOperation("修改成本核算明细")
+    @ApiOperation("修改现金明细")
     @PreAuthorize("@ss.hasPermi('travel:accounting:edit')")
-    @Log(title = "成本核算明细", businessType = BusinessType.UPDATE)
+    @Log(title = "现金明细", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CostDetail costDetail) {
-        return toAjax(costDetailService.updateById(costDetail));
+    public AjaxResult edit(@RequestBody CashDetail cashDetail) {
+        return toAjax(cashDetailService.updateById(cashDetail));
     }
 
     /**
-     * 删除成本核算明细
+     * 删除现金明细
      */
-    @ApiOperation("删除成本核算明细")
+    @ApiOperation("删除现金明细")
     @PreAuthorize("@ss.hasPermi('travel:accounting:remove')")
-    @Log(title = "成本核算明细", businessType = BusinessType.DELETE)
+    @Log(title = "现金明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(costDetailService.removeByIds(Arrays.asList(ids)));
+        return toAjax(cashDetailService.removeByIds(Arrays.asList(ids)));
     }
 }
