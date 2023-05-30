@@ -13,7 +13,7 @@ import com.ruoyi.framework.web.domain.MybatisPlusBaseEntity;
  * 成本核算明细对象 travel_cost_detail
  * 
  * @author 陈宇凡
- * @date 2023-05-21
+ * @date 2023-05-30
  */
 @Data
 @NoArgsConstructor
@@ -26,6 +26,7 @@ public class CostDetail extends MybatisPlusBaseEntity implements Serializable{
     private Long id;
 
     /** 成本核算ID */
+    @Excel(name = "成本核算ID")
     private Long operationCostId;
 
     /** 行程ID */

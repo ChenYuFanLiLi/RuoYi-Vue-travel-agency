@@ -57,6 +57,6 @@ public class CostAccounting extends MybatisPlusBaseEntity implements Serializabl
 
     /** 报账明细 */
     @Excel(name = "报账明细")
-    private String costReimbursementDetail;
+    private BigDecimal costReimbursementDetail;
 
 }

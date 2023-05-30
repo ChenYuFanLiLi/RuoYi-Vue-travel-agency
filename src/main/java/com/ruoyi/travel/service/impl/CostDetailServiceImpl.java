@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
  * 成本核算明细Service业务层处理
  * 
  * @author 陈宇凡
- * @date 2023-05-21
+ * @date 2023-05-30
  */
 @Service
 public class CostDetailServiceImpl extends ServiceImpl<CostDetailMapper, CostDetail> implements ICostDetailService {

@@ -48,6 +48,7 @@ public class CostAccountingController extends BaseController
     private final IOperationPlanService operationPlanService;
     private final IPlanDetailService planDetailService;
     private final ICostDetailService costDetailService;
+    private final ICashDetailService cashDetailService;
     /**
      * 查询行程，团号，出发日期，团队编号汇总
      * @return
@@ -147,6 +148,7 @@ public class CostAccountingController extends BaseController
             costDetail.setCostOnCredit(planDetail.getPlanCredit());
             costDetailService.save(costDetail);
         }
+        costAccountingService.calcTrends(id);
         return AjaxResult.success("1");
     }
 
@@ -169,6 +171,16 @@ public class CostAccountingController extends BaseController
     @Log(title = "成本核算，用于记录团队成本核算信息", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(costAccountingService.removeByIds(Arrays.asList(ids)));
+        AjaxResult ajaxResult =toAjax(costAccountingService.removeByIds(Arrays.asList(ids)));
+        for (Long id:ids){
+            QueryWrapper<CostDetail> queryWrapper = new QueryWrapper();
+            queryWrapper.eq("operation_cost_id",id);
+            costDetailService.remove(queryWrapper);
+
+            QueryWrapper<CashDetail> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("related_id",id).eq("cash_type","cost");
+            cashDetailService.remove(queryWrapper1);
+        }
+        return ajaxResult;
     }
 }

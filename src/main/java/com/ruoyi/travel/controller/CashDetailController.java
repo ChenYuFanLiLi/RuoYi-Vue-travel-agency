@@ -3,6 +3,8 @@ package com.ruoyi.travel.controller;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.travel.service.ICostAccountingService;
+import com.ruoyi.travel.service.IOperationPlanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +43,8 @@ import javax.servlet.http.HttpServletResponse;
 public class CashDetailController extends BaseController
 {
     private final ICashDetailService cashDetailService;
-
+    private final ICostAccountingService costAccountingService;
+    private final IOperationPlanService operationPlanService;
     /**
      * 查询现金明细列表
      */
@@ -85,7 +88,13 @@ public class CashDetailController extends BaseController
     @Log(title = "现金明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CashDetail cashDetail) {
-        return toAjax(cashDetailService.save(cashDetail));
+        AjaxResult ajaxResult = toAjax(cashDetailService.save(cashDetail));
+        if (cashDetail.getCashType().equals("cost")){
+            costAccountingService.calcTrends(cashDetail.getRelatedId());
+        }else if(cashDetail.getCashType().equals("plan")){
+            operationPlanService.calcTrends(cashDetail.getRelatedId());
+        }
+        return ajaxResult;
     }
 
     /**
@@ -96,7 +105,13 @@ public class CashDetailController extends BaseController
     @Log(title = "现金明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody CashDetail cashDetail) {
-        return toAjax(cashDetailService.updateById(cashDetail));
+        AjaxResult ajaxResult = toAjax(cashDetailService.updateById(cashDetail));
+        if (cashDetail.getCashType().equals("cost")){
+            costAccountingService.calcTrends(cashDetail.getRelatedId());
+        }else if(cashDetail.getCashType().equals("plan")){
+            operationPlanService.calcTrends(cashDetail.getRelatedId());
+        }
+        return ajaxResult;
     }
 
     /**
@@ -107,6 +122,13 @@ public class CashDetailController extends BaseController
     @Log(title = "现金明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(cashDetailService.removeByIds(Arrays.asList(ids)));
+        CashDetail cashDetail = cashDetailService.getById(ids[0]);
+        AjaxResult ajaxResult = toAjax(cashDetailService.removeByIds(Arrays.asList(ids)));
+        if (cashDetail.getCashType().equals("cost")){
+            costAccountingService.calcTrends(cashDetail.getRelatedId());
+        }else if(cashDetail.getCashType().equals("plan")){
+            operationPlanService.calcTrends(cashDetail.getRelatedId());
+        }
+        return ajaxResult;
     }
 }

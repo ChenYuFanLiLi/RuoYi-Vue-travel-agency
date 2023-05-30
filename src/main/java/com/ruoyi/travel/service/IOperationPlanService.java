@@ -10,5 +10,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @date 2023-05-07
  */
 public interface IOperationPlanService extends IService<OperationPlan> {
-
+    void calcTrends(Long operationPlanId);
 }

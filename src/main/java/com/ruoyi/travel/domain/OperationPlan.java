@@ -1,5 +1,6 @@
 package com.ruoyi.travel.domain;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.baomidou.mybatisplus.annotation.*;
@@ -70,5 +71,19 @@ public class OperationPlan extends MybatisPlusBaseEntity implements Serializable
     /** 计调电话 */
     @Excel(name = "计调电话")
     private String plannerPhone;
+
+
+    /** 现金合计 */
+    @Excel(name = "现金合计")
+    private BigDecimal planItemTotal;
+
+    /** 现收合计 */
+    @Excel(name = "现收合计")
+    private BigDecimal planCashTotal;
+
+    /** 导游领现 */
+    @Excel(name = "导游领现")
+    private BigDecimal planGuideCash;
+
 
 }
