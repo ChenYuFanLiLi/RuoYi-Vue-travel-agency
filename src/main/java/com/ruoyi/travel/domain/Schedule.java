@@ -28,6 +28,7 @@ public class Schedule extends MybatisPlusBaseEntity implements Serializable{
 
     /** 线路名称 */
     @Excel(name = "线路名称")
+    @TableField(condition = SqlCondition.LIKE)
     private String scheduleName;
 
     /** 线路天数 */

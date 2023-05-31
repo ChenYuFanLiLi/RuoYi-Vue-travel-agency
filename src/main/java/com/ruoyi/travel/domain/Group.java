@@ -27,6 +27,7 @@ public class Group extends MybatisPlusBaseEntity implements Serializable{
 
     /** 组团社名称 */
     @Excel(name = "组团社名称")
+    @TableField(condition = SqlCondition.LIKE)
     private String groupName;
 
     /** 组团社负责人姓名 */

@@ -1,6 +1,7 @@
 package com.ruoyi.travel.service.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -42,6 +43,19 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
         }else {
             return "导入失败";
         }
+    }
+
+    @Override
+    public Map<Long, List<Customer>> listByBookingIdsToMap(List<Long> bookingIds) {
+        List<Customer> customers = listByBookingIds(bookingIds);
+        return customers.stream().collect(Collectors.groupingBy(Customer::getBookingId));
+    }
+
+    @Override
+    public List<Customer> listByBookingIds(List<Long> bookingIds){
+        QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<Customer>().in("booking_id", bookingIds);
+        return list(customerQueryWrapper);
+
     }
 
 //    @Override

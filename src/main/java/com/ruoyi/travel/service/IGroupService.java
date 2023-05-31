@@ -3,6 +3,9 @@ package com.ruoyi.travel.service;
 import com.ruoyi.travel.domain.Group;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * 组团社信息Service接口
  * 
@@ -10,5 +13,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @date 2023-05-04
  */
 public interface IGroupService extends IService<Group> {
+
 
 }

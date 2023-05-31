@@ -6,6 +6,7 @@ import com.ruoyi.travel.dto.CustomerDTO;
 import com.ruoyi.travel.vo.CustomerVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户信息Service接口
@@ -17,5 +18,9 @@ public interface ICustomerService extends IService<Customer> {
 
     String importCustomer(List<Customer> customerList);
 
-//    List<CustomerVO> listByItineraryId(CustomerDTO customerDTO);
+    public Map<Long, List<Customer>> listByBookingIdsToMap(List<Long> bookingIds);
+
+    public List<Customer> listByBookingIds(List<Long> bookingIds);
+
+
 }

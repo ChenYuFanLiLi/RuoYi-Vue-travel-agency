@@ -38,4 +38,10 @@ public class ScheduleRoutingServiceImpl extends ServiceImpl<ScheduleRoutingMappe
         List<ScheduleRouting> list = list(scheduleRoutingQueryWrapper);
         return removeByIds(list.stream().map(ScheduleRouting::getId).collect(Collectors.toList()));
     }
+
+    @Override
+    public List<ScheduleRouting> listByScheduleId(Long id) {
+        QueryWrapper<ScheduleRouting> scheduleRoutingQueryWrapper = new QueryWrapper<ScheduleRouting>().eq("schedule_id", id);
+        return list(scheduleRoutingQueryWrapper);
+    }
 }

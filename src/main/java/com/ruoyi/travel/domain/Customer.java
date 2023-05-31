@@ -37,6 +37,7 @@ public class Customer extends MybatisPlusBaseEntity implements Serializable{
 
     /** 客户姓名 */
     @Excel(name = "客户姓名")
+    @TableField(condition = SqlCondition.LIKE)
     private String customerName;
 
     /** 证件类型 */
@@ -45,10 +46,12 @@ public class Customer extends MybatisPlusBaseEntity implements Serializable{
 
     /** 证件号码 */
     @Excel(name = "证件号码")
+    @TableField(condition = SqlCondition.LIKE)
     private String customerIdNumber;
 
     /** 联系方式 */
     @Excel(name = "联系方式")
+    @TableField(condition = SqlCondition.LIKE)
     private String customerContactInfo;
 
     /** 用房信息 */

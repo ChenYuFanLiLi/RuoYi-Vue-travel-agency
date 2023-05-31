@@ -28,10 +28,12 @@ public class Itinerary extends MybatisPlusBaseEntity implements Serializable{
 
     /** 行程名称 */
     @Excel(name = "行程名称")
+    @TableField(condition = SqlCondition.LIKE)
     private String itineraryName;
 
     /** 行程简称 */
     @Excel(name = "行程简称")
+    @TableField(condition = SqlCondition.LIKE)
     private String itineraryShortName;
 
     /** 线路名称 */

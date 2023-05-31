@@ -22,6 +22,9 @@ import com.ruoyi.travel.vo.ItineraryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -31,14 +34,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.DateFormatter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -69,92 +69,6 @@ public class ItineraryController extends BaseController
 
 
 
-    @GetMapping("/salesConfirmation")
-    public void salesConfirmation(Long id){
-        Itinerary itinerary = itineraryService.getById(id);
-
-    }
-
-    @PostMapping("/salesConfirmationBooking")
-    public void salesConfirmationBooking(Long itineraryId,Long bookingId,HttpServletResponse response) throws IOException {
-        Itinerary itinerary = itineraryService.getById(itineraryId);
-        String itinerarySchedule = itinerary.getItinerarySchedule();
-        Booking booking = bookingService.getById(bookingId);
-        Group group = groupService.getById(booking.getGroupId());
-        QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
-        customerQueryWrapper.eq("booking_id",bookingId);
-        List<Customer> customerList = customerService.list(customerQueryWrapper);
-        Schedule schedule = scheduleService.getById(itinerarySchedule);
-        Long scheduleId = schedule.getId();
-        QueryWrapper<ScheduleRouting> scheduleRoutingQueryWrapper = new QueryWrapper<>();
-        scheduleRoutingQueryWrapper.eq("schedule_id",scheduleId);
-        List<ScheduleRouting> scheduleRoutingList = scheduleRoutingService.list(scheduleRoutingQueryWrapper);
-
-        HashMap<String, Object> salesConfirmationExcelMap = new HashMap<>(20);
-
-        salesConfirmationExcelMap.put("groupCompanyName",group.getGroupCompanyName());
-        salesConfirmationExcelMap.put("groupRecipient",group.getGroupRecipient());
-        salesConfirmationExcelMap.put("groupPhone",group.getGroupPhone());
-        salesConfirmationExcelMap.put("groupMobile",group.getGroupMobile());
-        salesConfirmationExcelMap.put("departureDate", new SimpleDateFormat("yyyy/MM/dd").format(itinerary.getDepartureDate()));
-        salesConfirmationExcelMap.put("itineraryName",itinerary.getItineraryName());
-
-        //奇数列
-        ArrayList<HashMap<String, String>> customerOddExcelList = new ArrayList<>();
-        //偶数列
-        ArrayList<HashMap<String, String>> customerEvenExcelList = new ArrayList<>();
-
-        for (int i = 0; i < customerList.size(); i++) {
-            HashMap<String, String> customerMap = new HashMap<>();
-            customerMap.put("serial",String.valueOf(i+1));
-            customerMap.put("customerName",customerList.get(i).getCustomerName());
-            customerMap.put("cardId",customerList.get(i).getCustomerIdNumber());
-            customerMap.put("customerPhone",customerList.get(i).getCustomerContactInfo());
-            if (i%2==0){
-                customerOddExcelList.add(customerMap);
-            }else {
-                customerEvenExcelList.add(customerMap);
-            }
-        }
-
-        ArrayList<HashMap<String,String>> scheduleRoutingExcelList = new ArrayList<>();
-
-        for (ScheduleRouting scheduleRouting : scheduleRoutingList) {
-            HashMap<String, String> scheduleRoutingMap = new HashMap<>();
-            scheduleRoutingMap.put("date",new SimpleDateFormat("MM月dd日").format(DateUtils.addDays(itinerary.getDepartureDate(), scheduleRouting.getRoutingOrder().intValue())));
-            scheduleRoutingMap.put("content",scheduleRouting.getRoutingContent());
-            scheduleRoutingMap.put("place",scheduleRouting.getRoutingPlace());
-            scheduleRoutingMap.put("meal",scheduleRouting.getRoutingMeal());
-            scheduleRoutingExcelList.add(scheduleRoutingMap);
-        }
-
-
-
-
-
-//
-//        salesConfirmationExcelMap.put("group",group);
-//        salesConfirmationExcelMap.put("itinerary",itinerary);
-//        salesConfirmationExcelMap.put("customerList",customerList);
-//        salesConfirmationExcelMap.put("scheduleRoutingList",scheduleRoutingList);
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setCharacterEncoding("utf-8");
-        String fileName = URLEncoder.encode(itinerary.getItineraryName()+group.getGroupName()+"销售项目确认表").replace("\\+","%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xls");
-        Resource resource = new ClassPathResource("static/salesConfirmation.xlsx");
-
-
-
-        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(resource.getInputStream()).build();
-        WriteSheet writeSheet = EasyExcel.writerSheet().build();
-        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
-        excelWriter.fill(salesConfirmationExcelMap,writeSheet);
-        excelWriter.fill(new FillWrapper("customerOdd",customerOddExcelList),fillConfig,writeSheet);
-        excelWriter.fill(new FillWrapper("customerEven",customerEvenExcelList),fillConfig,writeSheet);
-        excelWriter.fill(new FillWrapper("routing",scheduleRoutingExcelList),fillConfig,writeSheet);
-        excelWriter.finish();
-    }
 
     /**
      * 查询行程列表
@@ -285,5 +199,199 @@ public class ItineraryController extends BaseController
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(itineraryService.removeByIds(Arrays.asList(ids)));
+    }
+
+    /**
+     * 销售项目确认表多表导出
+     * @param itineraryId 行程ID
+     */
+    @PostMapping("/salesConfirmation")
+    public void salesConfirmation(Long itineraryId,HttpServletResponse response) throws IOException {
+        Itinerary itinerary = itineraryService.getById(itineraryId);
+        String itinerarySchedule = itinerary.getItinerarySchedule();
+        List<Booking> bookingList = bookingService.listByItineraryId(itineraryId);
+        List<Long> bookingIds = bookingList.stream().map(Booking::getId).collect(Collectors.toList());
+        List<Long> groupIds = bookingList.stream().map(Booking::getGroupId).collect(Collectors.toList());
+        Map<Long,Group> groupMap = groupService.listByIds(groupIds).stream().collect(Collectors.toMap(Group::getId, v->v));
+        Map<Long,List<Customer>> customerBookingMap = customerService.listByBookingIdsToMap(bookingIds);
+        Schedule schedule = scheduleService.getById(itinerarySchedule);
+        List<ScheduleRouting> scheduleRoutingList = scheduleRoutingService.listByScheduleId(schedule.getId());
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("销售项目确认表").replace("\\+","%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xls");
+        Resource resource = new ClassPathResource("static/salesConfirmation.xlsx");
+        ArrayList<HashMap<String,String>> scheduleRoutingExcelList = new ArrayList<>();
+
+        InputStream telmplateInputStream = resource.getInputStream();
+
+        XSSFWorkbook workbook = new XSSFWorkbook(telmplateInputStream);
+        for (int i = 0; i < bookingList.size(); i++) {
+            if (i==0){
+                workbook.setSheetName(i,bookingList.get(i).getGroupName());
+            }else {
+                workbook.cloneSheet(0,bookingList.get(i).getGroupName());
+            }
+
+        }
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        workbook.write(byteArrayOutputStream);
+        byte[] bArray = byteArrayOutputStream.toByteArray();
+        InputStream template = new ByteArrayInputStream(bArray);
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(template).build();
+
+        for (ScheduleRouting scheduleRouting : scheduleRoutingList) {
+            HashMap<String, String> scheduleRoutingMap = new HashMap<>();
+            scheduleRoutingMap.put("date",new SimpleDateFormat("MM月dd日").format(DateUtils.addDays(itinerary.getDepartureDate(), scheduleRouting.getRoutingOrder().intValue())));
+            scheduleRoutingMap.put("content",scheduleRouting.getRoutingContent());
+            scheduleRoutingMap.put("place",scheduleRouting.getRoutingPlace());
+            scheduleRoutingMap.put("meal",scheduleRouting.getRoutingMeal());
+            scheduleRoutingExcelList.add(scheduleRoutingMap);
+        }
+
+        for (int i = 0; i < bookingList.size(); i++) {
+            HashMap<String, Object> salesConfirmationExcelMap = new HashMap<>(20);
+            Group group = groupMap.get(bookingList.get(i).getGroupId());
+            salesConfirmationExcelMap.put("groupCompanyName",group.getGroupCompanyName());
+            salesConfirmationExcelMap.put("groupRecipient",group.getGroupRecipient());
+            salesConfirmationExcelMap.put("groupPhone",group.getGroupPhone());
+            salesConfirmationExcelMap.put("groupMobile",group.getGroupMobile());
+            salesConfirmationExcelMap.put("departureDate", new SimpleDateFormat("yyyy/MM/dd").format(itinerary.getDepartureDate()));
+            salesConfirmationExcelMap.put("itineraryName",itinerary.getItineraryName());
+
+            //奇数列
+            ArrayList<HashMap<String, String>> customerOddExcelList = new ArrayList<>();
+            //偶数列
+            ArrayList<HashMap<String, String>> customerEvenExcelList = new ArrayList<>();
+
+            List<Customer> customerList = customerBookingMap.get(bookingList.get(i).getId());
+            if (customerList==null){
+                break;
+            }
+            for (int j = 0; j < customerList.size(); j++) {
+                HashMap<String, String> customerMap = new HashMap<>();
+                customerMap.put("serial",String.valueOf(j+1));
+                customerMap.put("customerName",customerList.get(j).getCustomerName());
+                customerMap.put("cardId",customerList.get(j).getCustomerIdNumber());
+                customerMap.put("customerPhone",customerList.get(j).getCustomerContactInfo());
+                if (j%2==0){
+                    customerOddExcelList.add(customerMap);
+                }else {
+                    customerEvenExcelList.add(customerMap);
+                }
+            }
+            WriteSheet writeSheet = EasyExcel.writerSheet(i).build();
+            FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
+            excelWriter.fill(salesConfirmationExcelMap,writeSheet);
+            excelWriter.fill(new FillWrapper("customerOdd",customerOddExcelList),fillConfig,writeSheet);
+            excelWriter.fill(new FillWrapper("customerEven",customerEvenExcelList),fillConfig,writeSheet);
+            excelWriter.fill(new FillWrapper("routing",scheduleRoutingExcelList),fillConfig,writeSheet);
+        }
+        excelWriter.finish();
+    }
+
+    /**
+     * 销售项目确认表单表导出
+     * @param itineraryId 行程ID
+     * @param bookingId 收客记录ID
+     * @param response 返回
+     * @throws IOException
+     */
+    @PostMapping("/salesConfirmationBooking")
+    public void salesConfirmationBooking(Long itineraryId,Long bookingId,HttpServletResponse response) throws IOException {
+        Itinerary itinerary = itineraryService.getById(itineraryId);
+        String itinerarySchedule = itinerary.getItinerarySchedule();
+        Booking booking = bookingService.getById(bookingId);
+        Group group = groupService.getById(booking.getGroupId());
+        QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
+        customerQueryWrapper.eq("booking_id",bookingId);
+        List<Customer> customerList = customerService.list(customerQueryWrapper);
+        Schedule schedule = scheduleService.getById(itinerarySchedule);
+        Long scheduleId = schedule.getId();
+        QueryWrapper<ScheduleRouting> scheduleRoutingQueryWrapper = new QueryWrapper<>();
+        scheduleRoutingQueryWrapper.eq("schedule_id",scheduleId);
+        List<ScheduleRouting> scheduleRoutingList = scheduleRoutingService.list(scheduleRoutingQueryWrapper);
+
+        HashMap<String, Object> salesConfirmationExcelMap = new HashMap<>(20);
+
+        salesConfirmationExcelMap.put("groupCompanyName",group.getGroupCompanyName());
+        salesConfirmationExcelMap.put("groupRecipient",group.getGroupRecipient());
+        salesConfirmationExcelMap.put("groupPhone",group.getGroupPhone());
+        salesConfirmationExcelMap.put("groupMobile",group.getGroupMobile());
+        salesConfirmationExcelMap.put("departureDate", new SimpleDateFormat("yyyy/MM/dd").format(itinerary.getDepartureDate()));
+        salesConfirmationExcelMap.put("itineraryName",itinerary.getItineraryName());
+
+        //奇数列
+        ArrayList<HashMap<String, String>> customerOddExcelList = new ArrayList<>();
+        //偶数列
+        ArrayList<HashMap<String, String>> customerEvenExcelList = new ArrayList<>();
+
+        for (int i = 0; i < customerList.size(); i++) {
+            HashMap<String, String> customerMap = new HashMap<>();
+            customerMap.put("serial",String.valueOf(i+1));
+            customerMap.put("customerName",customerList.get(i).getCustomerName());
+            customerMap.put("cardId",customerList.get(i).getCustomerIdNumber());
+            customerMap.put("customerPhone",customerList.get(i).getCustomerContactInfo());
+            if (i%2==0){
+                customerOddExcelList.add(customerMap);
+            }else {
+                customerEvenExcelList.add(customerMap);
+            }
+        }
+
+        ArrayList<HashMap<String,String>> scheduleRoutingExcelList = new ArrayList<>();
+
+        for (ScheduleRouting scheduleRouting : scheduleRoutingList) {
+            HashMap<String, String> scheduleRoutingMap = new HashMap<>();
+            scheduleRoutingMap.put("date",new SimpleDateFormat("MM月dd日").format(DateUtils.addDays(itinerary.getDepartureDate(), scheduleRouting.getRoutingOrder().intValue())));
+            scheduleRoutingMap.put("content",scheduleRouting.getRoutingContent());
+            scheduleRoutingMap.put("place",scheduleRouting.getRoutingPlace());
+            scheduleRoutingMap.put("meal",scheduleRouting.getRoutingMeal());
+            scheduleRoutingExcelList.add(scheduleRoutingMap);
+        }
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(itinerary.getItineraryName()+group.getGroupName()+"销售项目确认表").replace("\\+","%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xls");
+        Resource resource = new ClassPathResource("static/salesConfirmation.xlsx");
+
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(resource.getInputStream()).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet(0,group.getGroupName()).build();
+        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
+        excelWriter.fill(salesConfirmationExcelMap,writeSheet);
+        excelWriter.fill(new FillWrapper("customerOdd",customerOddExcelList),fillConfig,writeSheet);
+        excelWriter.fill(new FillWrapper("customerEven",customerEvenExcelList),fillConfig,writeSheet);
+        excelWriter.fill(new FillWrapper("routing",scheduleRoutingExcelList),fillConfig,writeSheet);
+        excelWriter.finish();
+    }
+
+    @PostMapping("/salesSettlementBooking")
+    public void salesSettlementBooking(Long itineraryId,Long bookingId,HttpServletResponse response) throws IOException{
+        Itinerary itinerary = itineraryService.getById(itineraryId);
+        Booking booking = bookingService.getById(bookingId);
+        Group group = groupService.getById(booking.getGroupId());
+        QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<Customer>().eq("booking_id", bookingId);
+        int customerCount = customerService.count(customerQueryWrapper);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("销售项目确认表").replace("\\+","%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xls");
+        Resource resource = new ClassPathResource("static/salesSettlement.xlsx");
+
+        HashMap<String, Object> salesSettlementExcelMap = new HashMap<>();
+        salesSettlementExcelMap.put("groupName",booking.getGroupName());
+        salesSettlementExcelMap.put("leaderName",booking.getGroupLeaderName());
+        salesSettlementExcelMap.put("itineraryName",itinerary.getItineraryName());
+        salesSettlementExcelMap.put("startTime",new SimpleDateFormat("yyyy年MM月dd日").format(itinerary.getDepartureDate()));
+        salesSettlementExcelMap.put("endTime",new SimpleDateFormat("yyyy年MM月dd日").format(DateUtils.addDays(itinerary.getDepartureDate(),itinerary.getScheduleDays().intValue()-1)));
+        salesSettlementExcelMap.put("customerCount",customerCount);
+
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(resource.getInputStream()).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet(0,group.getGroupName()).build();
+        excelWriter.fill(salesSettlementExcelMap,writeSheet);
+        excelWriter.finish();
     }
 }

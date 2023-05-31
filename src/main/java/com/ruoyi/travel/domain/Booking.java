@@ -46,14 +46,17 @@ public class Booking extends MybatisPlusBaseEntity implements Serializable{
 
     /** 组团社名称 */
     @Excel(name = "组团社名称")
+    @TableField(condition = SqlCondition.LIKE)
     private String groupName;
 
     /** 组团社负责人姓名 */
     @Excel(name = "组团社负责人姓名")
+    @TableField(condition = SqlCondition.LIKE)
     private String groupLeaderName;
 
     /** 组团社负责人电话 */
     @Excel(name = "组团社负责人电话")
+    @TableField(condition = SqlCondition.LIKE)
     private String groupLeaderPhone;
 
 }
