@@ -15,6 +15,7 @@ import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.web.page.TableDataInfo;
+import com.ruoyi.project.system.domain.SysUser;
 import com.ruoyi.project.system.service.ISysUserService;
 import com.ruoyi.travel.domain.*;
 import com.ruoyi.travel.service.*;
@@ -81,12 +82,16 @@ public class ItineraryController extends BaseController
         List<Itinerary> list = itineraryService.list(new QueryWrapper<Itinerary>(itinerary));
         TableDataInfo dataTable = getDataTable(list);
         ArrayList<ItineraryVO> itineraryVOList = new ArrayList<>();
+        List<Booking> bookingListByItineraryIds = bookingService.listByItineraryIds(list.stream().map(Itinerary::getId).collect(Collectors.toList()));
+        Map<Long, List<Booking>> bookingItineraryMap = bookingListByItineraryIds.stream().collect(Collectors.groupingBy(Booking::getItineraryId));
+        Map<Long,SysUser> sysUserMap = sysUserService.selectUserByIds(bookingListByItineraryIds.stream().map(Booking::getBookerId).collect(Collectors.toList()))
+                .stream()
+                .collect(Collectors.toMap(SysUser::getUserId, v->v));
+
         list.forEach(item->{
             ItineraryVO itineraryVO = new ItineraryVO();
             BeanUtils.copyProperties(item,itineraryVO);
-            QueryWrapper<Booking> bookingQueryWrapper = new QueryWrapper<>();
-            bookingQueryWrapper.eq("itinerary_id",item.getId());
-            List<Booking> bookingList = bookingService.list(bookingQueryWrapper);
+            List<Booking> bookingList = bookingItineraryMap.get(item.getId());
             if (bookingList.size()>0){
                 itineraryVO.setItineraryObligate(bookingList.stream().mapToLong(Booking::getBookingCount).summaryStatistics().getSum());
                 QueryWrapper<Customer> customerQueryWrapper = new QueryWrapper<>();
@@ -101,7 +106,7 @@ public class ItineraryController extends BaseController
                     builder.append(booking.getBookingCount());
                     builder.append("人");
                     if (booking.getBookerId()!=null){
-                        String nickName ="("+ sysUserService.selectUserById(booking.getBookerId()).getNickName()+")";
+                        String nickName ="("+ sysUserMap.get(booking.getBookerId()).getNickName()+")";
                         builder.append(nickName);
                     }else {
                         builder.append("未知");

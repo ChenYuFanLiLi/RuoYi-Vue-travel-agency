@@ -3,7 +3,9 @@ package com.ruoyi.travel.service;
 import com.ruoyi.travel.domain.Booking;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 收客记录Service接口
@@ -14,4 +16,8 @@ import java.util.List;
 public interface IBookingService extends IService<Booking> {
 
     List<Booking> listByItineraryId(Long itineraryId);
+
+    Map<Long, List<Booking>> listByItineraryIdsToMap(List<Long> itineraryIds);
+
+    List<Booking> listByItineraryIds(List<Long> itineraryIds);
 }
