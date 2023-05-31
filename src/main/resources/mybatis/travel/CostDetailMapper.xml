@@ -6,7 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <resultMap type="com.ruoyi.travel.domain.CostDetail" id="CostDetailResult">
         <result property="id"    column="id"    />
-        <result property="planDetailId"    column="plan_detail_id"    />
+        <result property="operationCostId"    column="operation_cost_id"    />
         <result property="travelScheduleId"    column="travel_schedule_id"    />
         <result property="projectId"    column="project_id"    />
         <result property="planType"    column="plan_type"    />
@@ -29,6 +29,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCostDetailVo">
-        select id, plan_detail_id, travel_schedule_id, project_id, plan_type, project_name, project_cost, project_amount, project_unit, cost_amount, cost_cash, cost_card, cost_transfer, cost_offset, cost_on_credit, cost_voucher, create_time, create_by, update_time, update_by, remark, from travel_cost_detail
+        select id, operation_cost_id, travel_schedule_id, project_id, plan_type, project_name, project_cost, project_amount, project_unit, cost_amount, cost_cash, cost_card, cost_transfer, cost_offset, cost_on_credit, cost_voucher, create_time, create_by, update_time, update_by, remark, from travel_cost_detail
     </sql>
 </mapper>

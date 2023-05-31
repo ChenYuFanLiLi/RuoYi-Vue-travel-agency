@@ -3,9 +3,11 @@ package com.ruoyi.travel.controller;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.travel.service.IOperationPlanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 public class PlanDetailController extends BaseController
 {
     private final IPlanDetailService planDetailService;
+    private final IOperationPlanService operationPlanService;
 
     /**
      * 查询计划项目明细列表
@@ -85,7 +88,9 @@ public class PlanDetailController extends BaseController
     @Log(title = "计划项目明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody PlanDetail planDetail) {
-        return toAjax(planDetailService.save(planDetail));
+        AjaxResult ajaxResult = toAjax(planDetailService.save(planDetail));
+        operationPlanService.calcTrends(planDetail.getOperationPlanId());
+        return ajaxResult;
     }
 
     /**
@@ -96,7 +101,9 @@ public class PlanDetailController extends BaseController
     @Log(title = "计划项目明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody PlanDetail planDetail) {
-        return toAjax(planDetailService.updateById(planDetail));
+        AjaxResult ajaxResult = toAjax(planDetailService.updateById(planDetail));
+        operationPlanService.calcTrends(planDetail.getOperationPlanId());
+        return ajaxResult;
     }
 
     /**
@@ -107,6 +114,9 @@ public class PlanDetailController extends BaseController
     @Log(title = "计划项目明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(planDetailService.removeByIds(Arrays.asList(ids)));
+        PlanDetail planDetail = planDetailService.getById(ids[0]);
+        AjaxResult ajaxResult = toAjax(planDetailService.removeByIds(Arrays.asList(ids)));
+        operationPlanService.calcTrends(planDetail.getOperationPlanId());
+        return ajaxResult;
     }
 }

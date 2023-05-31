@@ -10,5 +10,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @date 2023-05-21
  */
 public interface ICostAccountingService extends IService<CostAccounting> {
-
+    //计算动态字段
+    void calcTrends(Long operationCostId);
 }

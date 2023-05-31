@@ -10,8 +10,10 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.ruoyi.travel.domain.Itinerary;
+import com.ruoyi.travel.domain.*;
+import com.ruoyi.travel.service.ICashDetailService;
 import com.ruoyi.travel.service.IItineraryService;
+import com.ruoyi.travel.service.IPlanDetailService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +33,6 @@ import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
-import com.ruoyi.travel.domain.OperationPlan;
 import com.ruoyi.travel.service.IOperationPlanService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
@@ -53,6 +54,8 @@ public class OperationPlanController extends BaseController
     private final IOperationPlanService operationPlanService;
     private final IItineraryService itineraryService;
     private final RedisTemplate redisTemplate;
+    private final IPlanDetailService planDetailService;
+    private final ICashDetailService cashDetailService;
     /**
      * 查询未选择行程表
      */
@@ -174,6 +177,16 @@ public class OperationPlanController extends BaseController
     @Log(title = "操作计划", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(operationPlanService.removeByIds(Arrays.asList(ids)));
+        AjaxResult ajaxResult = toAjax(operationPlanService.removeByIds(Arrays.asList(ids)));
+        for (Long id:ids){
+            QueryWrapper<PlanDetail> queryWrapper = new QueryWrapper();
+            queryWrapper.eq("operation_plan_id",id);
+            planDetailService.remove(queryWrapper);
+
+            QueryWrapper<CashDetail> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("related_id",id).eq("cash_type","plan");
+            cashDetailService.remove(queryWrapper1);
+        }
+        return ajaxResult;
     }
 }

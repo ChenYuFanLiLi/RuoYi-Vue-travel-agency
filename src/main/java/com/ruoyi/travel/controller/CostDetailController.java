@@ -3,6 +3,7 @@ package com.ruoyi.travel.controller;
 import java.util.List;
 import java.util.Arrays;
 
+import com.ruoyi.travel.service.ICostAccountingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  * 成本核算明细Controller
  * 
  * @author 陈宇凡
- * @date 2023-05-21
+ * @date 2023-05-30
  */
 @RestController
 @RequestMapping("/travel/costdetail")
@@ -41,12 +42,13 @@ import javax.servlet.http.HttpServletResponse;
 public class CostDetailController extends BaseController
 {
     private final ICostDetailService costDetailService;
+    private final ICostAccountingService costAccountingService;
 
     /**
      * 查询成本核算明细列表
      */
     @ApiOperation("查询成本核算明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:list')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:list')")
     @GetMapping("/list")
     public TableDataInfo list(CostDetail costDetail) {
         startPage();
@@ -58,7 +60,7 @@ public class CostDetailController extends BaseController
      * 导出成本核算明细列表
      */
     @ApiOperation("导出成本核算明细列表")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:export')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:export')")
     @Log(title = "成本核算明细", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response,CostDetail costDetail) {
@@ -71,7 +73,7 @@ public class CostDetailController extends BaseController
      * 获取成本核算明细详细信息
      */
     @ApiOperation("获取成本核算明细详细信息")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:query')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(costDetailService.getById(id));
@@ -81,32 +83,39 @@ public class CostDetailController extends BaseController
      * 新增成本核算明细
      */
     @ApiOperation("新增成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:add')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:add')")
     @Log(title = "成本核算明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CostDetail costDetail) {
-        return toAjax(costDetailService.save(costDetail));
+        AjaxResult ajaxResult = toAjax(costDetailService.save(costDetail));
+        costAccountingService.calcTrends(costDetail.getOperationCostId());
+        return ajaxResult;
     }
 
     /**
      * 修改成本核算明细
      */
     @ApiOperation("修改成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:edit')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:edit')")
     @Log(title = "成本核算明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody CostDetail costDetail) {
-        return toAjax(costDetailService.updateById(costDetail));
+        AjaxResult ajaxResult = toAjax(costDetailService.updateById(costDetail));
+        costAccountingService.calcTrends(costDetail.getOperationCostId());
+        return ajaxResult;
     }
 
     /**
      * 删除成本核算明细
      */
     @ApiOperation("删除成本核算明细")
-    @PreAuthorize("@ss.hasPermi('travel:accounting:remove')")
+    @PreAuthorize("@ss.hasPermi('travel:costdetail:remove')")
     @Log(title = "成本核算明细", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        return toAjax(costDetailService.removeByIds(Arrays.asList(ids)));
+        CostDetail costDetail = costDetailService.getById(ids[0]);
+        AjaxResult ajaxResult = toAjax(costDetailService.removeByIds(Arrays.asList(ids)));
+        costAccountingService.calcTrends(costDetail.getOperationCostId());
+        return ajaxResult;
     }
 }

@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
  * 成本核算明细Mapper接口
  * 
  * @author 陈宇凡
- * @date 2023-05-21
+ * @date 2023-05-30
  */
 @Mapper
 public interface CostDetailMapper extends BaseMapper<CostDetail> {
