@@ -1,14 +1,20 @@
 package com.ruoyi.travel.controller;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.util.MapUtils;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.fill.FillConfig;
+import com.alibaba.excel.write.metadata.fill.FillWrapper;
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.travel.domain.*;
 import com.ruoyi.travel.service.ICashDetailService;
@@ -17,6 +23,8 @@ import com.ruoyi.travel.service.IPlanDetailService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,14 +101,139 @@ public class OperationPlanController extends BaseController
     /**
      * 导出操作计划列表
      */
+//    @ApiOperation("导出操作计划列表")
+//    @PreAuthorize("@ss.hasPermi('travel:plan:export')")
+//    @Log(title = "操作计划", businessType = BusinessType.EXPORT)
+//    @RequestMapping("/export")
+//    public void export(HttpServletResponse response,OperationPlan operationPlan) {
+//        List<OperationPlan> list = operationPlanService.list(new QueryWrapper<OperationPlan>(operationPlan));
+//        ExcelUtil<OperationPlan> util = new ExcelUtil<OperationPlan>(OperationPlan.class);
+//        util.exportExcel(response ,list, "plan");
+//    }
     @ApiOperation("导出操作计划列表")
     @PreAuthorize("@ss.hasPermi('travel:plan:export')")
     @Log(title = "操作计划", businessType = BusinessType.EXPORT)
     @RequestMapping("/export")
-    public void export(HttpServletResponse response,OperationPlan operationPlan) {
-        List<OperationPlan> list = operationPlanService.list(new QueryWrapper<OperationPlan>(operationPlan));
-        ExcelUtil<OperationPlan> util = new ExcelUtil<OperationPlan>(OperationPlan.class);
-        util.exportExcel(response ,list, "plan");
+    public void export(Long planId,HttpServletResponse response) throws IOException {
+        if(planId == null)
+            return;
+
+        Resource resource = new ClassPathResource("static/operationPlan.xlsx");
+        String templateFileName = resource.getFile().getPath();
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + "test" + ".xls");
+
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(templateFileName).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet().build();
+        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
+
+        Map<String,Object> map = MapUtils.newHashMap();
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+
+        //导游姓名，导游电话
+        OperationPlan operationPlan = operationPlanService.getById(planId);
+        map.put("guideName",operationPlan.getGuideName());
+        map.put("guidePhone",operationPlan.getGuidePhone());
+        map.put("groupNumber",operationPlan.getGroupNumber());
+        map.put("date",dateFormat.format(operationPlan.getPlanDepartureDate()));
+        map.put("teamId",operationPlan.getTeamId());
+
+        //明细合计项
+        BigDecimal amountTotal = BigDecimal.valueOf(0);
+        BigDecimal cashTotal = BigDecimal.valueOf(0);
+        BigDecimal cardTotal = BigDecimal.valueOf(0);
+        BigDecimal transferTotal = BigDecimal.valueOf(0);
+        BigDecimal offsetTotal = BigDecimal.valueOf(0);
+        BigDecimal creditTotal = BigDecimal.valueOf(0);
+
+        //现收合计项
+        BigDecimal cashAmountTotal = BigDecimal.valueOf(0);
+        BigDecimal cashDiscountTotal = BigDecimal.valueOf(0);
+
+        //现收差值
+        BigDecimal AmountSub = BigDecimal.valueOf(0);
+
+        //计划明细
+        List<Map<String,Object>> planDetailList = new ArrayList<>();
+        QueryWrapper<PlanDetail> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("operation_plan_id",planId);
+        List<PlanDetail> list = planDetailService.list(queryWrapper);
+        Long planDetailNo = 0L;
+        for(PlanDetail planDetail:list){
+            Map<String,Object> tempMap = MapUtils.newHashMap();
+
+            tempMap.put("No",++planDetailNo);
+            tempMap.put("date",dateFormat.format(operationPlan.getPlanDepartureDate()));
+            tempMap.put("type",planDetail.getPlanType());
+            tempMap.put("item",planDetail.getProjectName());
+            tempMap.put("cost",planDetail.getProjectCost());
+            tempMap.put("unit",planDetail.getProjectUnit());
+            tempMap.put("quantity",planDetail.getProjectQuantity());
+
+            tempMap.put("amount",planDetail.getPlanAmount());
+            amountTotal = amountTotal.add(planDetail.getPlanAmount());
+            tempMap.put("cash",planDetail.getPlanCash());
+            cashTotal = cashTotal.add(planDetail.getPlanCash());
+            tempMap.put("card",planDetail.getPlanCard());
+            cardTotal = cardTotal.add(planDetail.getPlanCard());
+            tempMap.put("transfer",planDetail.getPlanTransfer());
+            transferTotal = transferTotal.add(planDetail.getPlanTransfer());
+            tempMap.put("offset",planDetail.getPlanOffset());
+            offsetTotal = offsetTotal.add(planDetail.getPlanOffset());
+            tempMap.put("credit",planDetail.getPlanCredit());
+            creditTotal = creditTotal.add(planDetail.getPlanCredit());
+            tempMap.put("remark",planDetail.getRemark());
+
+            planDetailList.add(tempMap);
+        }
+
+        //现收明细
+        List<Map<String,Object>> cashList = new ArrayList<>();
+        QueryWrapper<CashDetail> queryWrapperCash = new QueryWrapper<>();
+        queryWrapperCash.eq("related_id",planId);
+        queryWrapperCash.eq("cash_type","plan");
+        List<CashDetail> listCash = cashDetailService.list(queryWrapperCash);
+        for(CashDetail cashDetail:listCash){
+            Map<String,Object> tempMap = MapUtils.newHashMap();
+
+            tempMap.put("project",cashDetail.getCashProject());
+            tempMap.put("price",cashDetail.getCashUnitPrice());
+            tempMap.put("unit",cashDetail.getCashUnit());
+            tempMap.put("quantity",cashDetail.getCashQuantity());
+            tempMap.put("remark",cashDetail.getRemark());
+
+            tempMap.put("amount",cashDetail.getCashAmount());
+            cashAmountTotal = cashAmountTotal.add(cashDetail.getCashAmount());
+            tempMap.put("discount",cashDetail.getCashDiscount());
+            cashDiscountTotal = cashDiscountTotal.add(cashDetail.getCashDiscount());
+
+            cashList.add(tempMap);
+        }
+
+        //合计计算
+        AmountSub = cashTotal.subtract(cashAmountTotal);
+
+        //合计填充
+        map.put("amountTotal",amountTotal);
+        map.put("cashTotal",cashTotal);
+        map.put("cardTotal",cardTotal);
+        map.put("transferTotal",transferTotal);
+        map.put("offsetTotal",offsetTotal);
+        map.put("creditTotal",creditTotal);
+
+        map.put("cashAmountTotal",cashAmountTotal);
+        map.put("cashDiscountTotal",cashDiscountTotal);
+
+        map.put("AmountSub",AmountSub);
+
+        excelWriter.fill(map,writeSheet);
+        excelWriter.fill(new FillWrapper("planDetail",planDetailList),fillConfig,writeSheet);
+        excelWriter.fill(new FillWrapper("cash",cashList),fillConfig,writeSheet);
+        excelWriter.finish();
+
     }
 
     /**
