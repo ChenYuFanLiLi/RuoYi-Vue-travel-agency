@@ -13,16 +13,19 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.util.MapUtils;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.WriteWorkbook;
 import com.alibaba.excel.write.metadata.fill.FillConfig;
 import com.alibaba.excel.write.metadata.fill.FillWrapper;
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.travel.domain.*;
+import com.ruoyi.travel.handler.CustomCellWriteHandler;
 import com.ruoyi.travel.service.ICashDetailService;
 import com.ruoyi.travel.service.IItineraryService;
 import com.ruoyi.travel.service.IPlanDetailService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import net.sf.jsqlparser.statement.merge.Merge;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -119,15 +122,10 @@ public class OperationPlanController extends BaseController
             return;
 
         Resource resource = new ClassPathResource("static/operationPlan.xlsx");
-        String templateFileName = resource.getFile().getPath();
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + "test" + ".xls");
-
-        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(templateFileName).build();
-        WriteSheet writeSheet = EasyExcel.writerSheet().build();
-        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
 
         Map<String,Object> map = MapUtils.newHashMap();
 
@@ -205,10 +203,10 @@ public class OperationPlanController extends BaseController
             tempMap.put("quantity",cashDetail.getCashQuantity());
             tempMap.put("remark",cashDetail.getRemark());
 
-            tempMap.put("amount",cashDetail.getCashAmount());
             cashAmountTotal = cashAmountTotal.add(cashDetail.getCashAmount());
-            tempMap.put("discount",cashDetail.getCashDiscount());
+            tempMap.put("amount",cashDetail.getCashAmount());
             cashDiscountTotal = cashDiscountTotal.add(cashDetail.getCashDiscount());
+            tempMap.put("discount",cashDetail.getCashDiscount());
 
             cashList.add(tempMap);
         }
@@ -228,6 +226,10 @@ public class OperationPlanController extends BaseController
         map.put("cashDiscountTotal",cashDiscountTotal);
 
         map.put("AmountSub",AmountSub);
+
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).withTemplate(resource.getInputStream()).inMemory(Boolean.TRUE).build();
+        WriteSheet writeSheet = EasyExcel.writerSheet().registerWriteHandler(new CustomCellWriteHandler(list.size() + 7,listCash.size() + list.size() + 5,1,3)).build();
+        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
 
         excelWriter.fill(map,writeSheet);
         excelWriter.fill(new FillWrapper("planDetail",planDetailList),fillConfig,writeSheet);
